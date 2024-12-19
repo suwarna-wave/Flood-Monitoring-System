@@ -1,0 +1,60 @@
+
+// Ultrasonic sensor pins
+const int trigPin = 9; // Trigger pin of HC-SR04
+const int echoPin = 10; // Echo pin of HC-SR04
+
+// Buzzer pin
+const int buzzerPin = 8;
+
+// Flood threshold in cm
+const int floodThreshold = 20;
+
+void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+
+  // Initialize GPIOs
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+
+  // Initial message
+  Serial.println("Flood Monitoring System Initialized...");
+}
+
+void loop() {
+  // Measure distance using the ultrasonic sensor
+  int distance = measureDistance();
+
+  // Print distance to Serial Monitor
+  Serial.print("Measured Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Check if water level crosses the flood threshold
+  if (distance < floodThreshold) {
+    Serial.println("Alert: Flood detected! Water level is critical.");
+    digitalWrite(buzzerPin, HIGH); // Turn on the buzzer
+  } else {
+    Serial.println("Water level is safe.");
+    digitalWrite(buzzerPin, LOW); // Turn off the buzzer
+  }
+
+  delay(1000); // Delay to avoid spamming
+}
+
+int measureDistance() {
+  // Trigger the ultrasonic sensor
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Measure the duration of the echo pulse
+  long duration = pulseIn(echoPin, HIGH);
+
+  // Convert duration to distance in cm
+  int distance = duration * 0.034 / 2; // Speed of sound in air = 0.034 cm/µs
+  return distance;
+}
